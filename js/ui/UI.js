@@ -2,12 +2,21 @@
 export class UI {
     constructor(appInstance) {
         this.app = appInstance;
+        this.globalPin = "1234";
+        this.currentPinInput = "";
         this.cacheDOM();
         this.bindEvents();
         this.checkAdminSession();
     }
 
     cacheDOM() {
+        // Pincode Elements
+        this.globalLoginScreen = document.getElementById("globalLoginScreen");
+        this.pinDisplay = document.getElementById("pinDisplay");
+        this.pinBtns = document.querySelectorAll(".pin-btn[data-val]");
+        this.pinDelete = document.getElementById("pinDelete");
+        this.pinEnter = document.getElementById("pinEnter");
+
         this.publicDashboard = document.getElementById("publicDashboard");
         this.adminDashboard = document.getElementById("adminDashboard");
         this.adminModal = document.getElementById("adminModal");
@@ -82,7 +91,7 @@ export class UI {
     }
 
         bindEvents() {
-        // Pin Pad Events
+        // Pincode Events
         if (this.pinBtns && this.pinBtns.length > 0) {
             this.pinBtns.forEach(btn => {
                 btn.addEventListener('click', (e) => {
@@ -93,15 +102,18 @@ export class UI {
                 });
             });
             
-            this.pinClear.addEventListener('click', () => {
-                this.currentPinInput = "";
-                this.updatePinDisplay();
-            });
+            if (this.pinDelete) {
+                this.pinDelete.addEventListener('click', () => {
+                    this.currentPinInput = this.currentPinInput.slice(0, -1);
+                    this.updatePinDisplay();
+                });
+            }
             
-            this.pinDelete.addEventListener('click', () => {
-                this.currentPinInput = this.currentPinInput.slice(0, -1);
-                this.updatePinDisplay();
-            });
+            if (this.pinEnter) {
+                this.pinEnter.addEventListener('click', () => {
+                    this.validatePin();
+                });
+            }
         }
 
         // Modal Detalle Stats
@@ -623,6 +635,30 @@ export class UI {
     }
 
 
+    updatePinDisplay() {
+        if (!this.pinDisplay) return;
+        this.pinDisplay.textContent = '*'.repeat(this.currentPinInput.length);
+    }
+    
+    validatePin() {
+        if (this.currentPinInput === this.globalPin) {
+            this.globalLoginScreen.style.opacity = '0';
+            this.globalLoginScreen.style.transition = 'opacity 0.4s ease';
+            setTimeout(() => {
+                this.globalLoginScreen.style.display = 'none';
+                this.publicDashboard.classList.add('active');
+            }, 400);
+        } else {
+            this.pinDisplay.style.color = '#e74c3c';
+            this.pinDisplay.textContent = '❌ Error';
+            this.currentPinInput = "";
+            setTimeout(() => {
+                this.pinDisplay.style.color = 'var(--text)';
+                this.updatePinDisplay();
+            }, 800);
+        }
+    }
+
     updateView() {
         const mems = this.app.natillera.getMembers();
         this.renderGlobalStats();
@@ -639,6 +675,7 @@ export class UI {
         return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
     }
 }
+
 
 
 
