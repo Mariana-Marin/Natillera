@@ -499,25 +499,107 @@ export class UI {
             return;
         }
 
+        const isAdmin = localStorage.getItem("natilleraAdminAuth") === "true";
+
         this.historyList.innerHTML = h.map(item => {
-            // Clases por tipo (Colores de la tarjeta)
             let cardClass = "";
-            let icon = "";
-            if(item.type === 'ahorro') { cardClass = "card-green"; icon=""; }
-            else if(item.type === 'prestamo') { cardClass = "card-red"; icon=""; }
-            else if(item.type === 'abono' || item.type === 'interes') { cardClass = "card-yellow"; icon=""; }
-            else if(item.type === 'polla') { cardClass = "card-purple"; icon=""; }
-            else if(item.type === 'fondo_actividad' || item.type === 'actividad') { cardClass = "card-blue"; icon=""; }
+            if(item.type === 'ahorro') { cardClass = "card-green"; }
+            else if(item.type === 'prestamo') { cardClass = "card-red"; }
+            else if(item.type === 'abono' || item.type === 'interes') { cardClass = "card-yellow"; }
+            else if(item.type === 'polla') { cardClass = "card-purple"; }
+            else if(item.type === 'fondo_actividad' || item.type === 'actividad') { cardClass = "card-blue"; }
+
+            let actions = "";
+            if(isAdmin) {
+                if(item.globalIndex !== undefined) {
+                    actions = `
+                    <div style="float: right;">
+                        <button class="btn info btn-sm e-card-btn" data-type="global" data-idx="${item.globalIndex}" data-amt="${item.amount}" data-desc="${item.desc}" data-date="${item.date}" title="Editar" style="padding: 2px 6px; margin-right: 5px;"></button>
+                        <button class="btn danger btn-sm d-card-btn" data-type="global" data-idx="${item.globalIndex}" title="Eliminar" style="padding: 2px 6px;"></button>
+                    </div>`;
+                } else if(item.memberIndex !== undefined) {
+                    actions = `
+                    <div style="float: right;">
+                        <button class="btn info btn-sm e-card-btn" data-type="member" data-mid="${item.memberId}" data-idx="${item.memberIndex}" data-amt="${item.amount}" data-desc="${item.desc}" data-date="${item.date}" title="Editar" style="padding: 2px 6px; margin-right: 5px;"></button>
+                        <button class="btn danger btn-sm d-card-btn" data-type="member" data-mid="${item.memberId}" data-idx="${item.memberIndex}" title="Eliminar" style="padding: 2px 6px;"></button>
+                    </div>`;
+                }
+            }
 
             return `
             <div class="history-item ${cardClass} animate__animated animate__fadeIn">
+                ${actions}
                 <div class="h-date"> ${item.date}</div>
                 <div class="h-amount">${item.amount > 0 ? this.formatMoney(item.amount) : ''}</div>
-                <div class="h-desc">${icon} ${item.memberName ? `<strong>${item.memberName}</strong>: ` : ''}${item.desc}</div>
+                <div class="h-desc">${item.memberName ? `<strong>${item.memberName}</strong>: ` : ''}${item.desc}</div>
             </div>
             `
         }).join('');
+
+        if(isAdmin) {
+            document.querySelectorAll('.d-card-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const btnEl = e.target.closest('.d-card-btn');
+                    if(confirm("¿Estás seguro de ELIMINAR esta transacción (y revertir el dinero asociado)?")) {
+                        const type = btnEl.getAttribute('data-type');
+                        const idx = parseInt(btnEl.getAttribute('data-idx'));
+                        
+                        let ok = false;
+                        if(type === 'global') {
+                            ok = this.app.natillera.deleteGlobalEventByIndex(idx) !== null;
+                        } else {
+                            const mid = btnEl.getAttribute('data-mid');
+                            ok = this.app.natillera.undoMemberEvent(mid, idx);
+                        }
+                        
+                        if(ok) {
+                            this.app.saveChanges();
+                            alert("Transacción eliminada con éxito.");
+                        } else {
+                            alert("No se pudo eliminar.");
+                        }
+                    }
+                });
+            });
+
+            document.querySelectorAll('.e-card-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const btnEl = e.target.closest('.e-card-btn');
+                    const type = btnEl.getAttribute('data-type');
+                    const idx = parseInt(btnEl.getAttribute('data-idx'));
+                    const mid = btnEl.getAttribute('data-mid');
+                    
+                    const oldAmt = parseInt(btnEl.getAttribute('data-amt')) || 0;
+                    const oldDesc = btnEl.getAttribute('data-desc');
+                    const oldDate = btnEl.getAttribute('data-date');
+                    
+                    const newAmtRaw = prompt("Ingresa el NUEVO VALOR numérico para esta transacción:", oldAmt);
+                    if(newAmtRaw === null) return;
+                    const newAmt = parseInt(newAmtRaw) || 0;
+                    
+                    const newDesc = prompt("Ingresa la nueva DESCRIPCIÓN:", oldDesc) || oldDesc;
+                    const newDate = prompt("Ingresa la nueva FECHA (YYYY-MM-DD):", oldDate) || oldDate;
+                    
+                    if(confirm(`Se registrará el ajuste a:\nValor: $${newAmt}\nDetalle: ${newDesc}\n¿Proceder?`)) {
+                        let ok = false;
+                        if(type === 'global') {
+                            ok = this.app.natillera.editGlobalEventByIndex(idx, newAmt, newDesc, newDate);
+                        } else {
+                            ok = this.app.natillera.editMemberEvent(mid, idx, newAmt, newDesc, newDate);
+                        }
+                        
+                        if(ok) {
+                            this.app.saveChanges();
+                            alert("Transacción editada con éxito.");
+                        } else {
+                            alert("Error al editar.");
+                        }
+                    }
+                });
+            });
+        }
     }
+
 
     updateView() {
         const mems = this.app.natillera.getMembers();
@@ -535,5 +617,6 @@ export class UI {
         return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
     }
 }
+
 
 

@@ -52,6 +52,35 @@
         this.addHistory(date, 0, `Participó en: ${activityName}`, 'actividad');
     }
 
+    editHistoryEventByIndex(itemIdx, newAmount, newDesc, newDate) {
+        if(itemIdx < 0 || itemIdx >= this.history.length) return false;
+
+        const item = this.history[itemIdx];
+        const diff = newAmount - item.amount;
+
+        // Ajustar balances según el tipo
+        if(item.type === 'ahorro') {
+            this.savings += diff;
+        } else if(item.type === 'prestamo') {
+            let activeLoan = this.loans.find(l => l.amount === item.amount) || this.loans[this.loans.length - 1];
+            if(activeLoan) {
+                activeLoan.amount += diff;
+                activeLoan.remaining += diff;
+            }
+        } else if(item.type === 'abono') {
+            let activeLoan = this.loans.find(l => l.remaining < l.amount) || this.loans[this.loans.length - 1];
+            if(activeLoan) activeLoan.remaining = Math.max(0, activeLoan.remaining - diff);
+        } else if(item.type === 'interes') {
+            let activeLoan = this.loans.find(l => l.interestPaid >= item.amount) || this.loans[this.loans.length - 1];
+            if(activeLoan) activeLoan.interestPaid += diff;
+        }
+
+        item.amount = newAmount;
+        if(newDesc) item.desc = newDesc;
+        if(newDate) item.date = newDate;
+        return true;
+    }
+
 undoHistoryEventByIndex(itemIdx) {
         if(itemIdx < 0 || itemIdx >= this.history.length) return null;
         

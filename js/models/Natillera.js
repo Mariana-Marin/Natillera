@@ -82,11 +82,59 @@ export class Natillera {
         return item;
     }
 
+    deleteGlobalEventByIndex(index) {
+        if(index < 0 || index >= this.generalHistory.length) return null;
+        
+        const item = this.generalHistory[index];
+        if(item.type === 'polla' || item.type === 'fondo_actividad' || item.type === 'fondo_interes') {
+            this.commonFund -= item.amount;
+        }
+        
+        this.generalHistory.splice(index, 1);
+        return item;
+    }
+
+    editGlobalEventByIndex(index, newAmount, newDesc, newDate) {
+        if(index < 0 || index >= this.generalHistory.length) return false;
+        
+        const item = this.generalHistory[index];
+        const diff = newAmount - item.amount;
+        
+        if(item.type === 'polla' || item.type === 'fondo_actividad' || item.type === 'fondo_interes') {
+            this.commonFund += diff;
+        }
+        
+        item.amount = newAmount;
+        if(newDesc) item.desc = newDesc;
+        if(newDate) item.date = newDate;
+        return true;
+    }
+
     deleteMember(id) {
         const memIdx = this.members.findIndex(m => m.id === id);
         if(memIdx !== -1) {
             // Elimigamos el miembro, y la actualización re-calculará todo
             this.members.splice(memIdx, 1);
+            this.updateTotalSavings();
+            return true;
+        }
+        return false;
+    }
+
+    editMemberEvent(memberId, index, newAmount, newDesc, newDate) {
+        const m = this.getMember(memberId);
+        if(!m) return false;
+        
+        const oldAmount = m.history[index]?.amount || 0;
+        const type = m.history[index]?.type;
+        
+        const ok = m.editHistoryEventByIndex(index, newAmount, newDesc, newDate);
+        if(ok) {
+            // Reajustar fondo global si lo modificado era interés
+            if(type === 'interes') {
+                const diff = newAmount - oldAmount;
+                this.commonFund += diff;
+            }
             this.updateTotalSavings();
             return true;
         }
@@ -130,10 +178,10 @@ export class Natillera {
     }
 
     getAllHistory() {
-        let all = [...this.generalHistory];
+        let all = this.generalHistory.map((h, i) => ({ ...h, globalIndex: i }));
         this.members.forEach(m => {
-            m.history.forEach(h => {
-                all.push({ ...h, memberName: m.name });
+            m.history.forEach((h, j) => {
+                all.push({ ...h, memberName: m.name, memberId: m.id, memberIndex: j });
             });
         });
         return all.sort((a,b) => new Date(b.date) - new Date(a.date));
