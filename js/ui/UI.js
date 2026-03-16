@@ -514,14 +514,14 @@ export class UI {
                 if(item.globalIndex !== undefined) {
                     actions = `
                     <div style="float: right;">
-                        <button class="btn info btn-sm e-card-btn" data-type="global" data-idx="${item.globalIndex}" data-amt="${item.amount}" data-desc="${item.desc}" data-date="${item.date}" title="Editar" style="padding: 2px 6px; margin-right: 5px;"></button>
-                        <button class="btn danger btn-sm d-card-btn" data-type="global" data-idx="${item.globalIndex}" title="Eliminar" style="padding: 2px 6px;"></button>
+                        <button class="btn info btn-sm e-card-btn" data-type="global" data-idx="${item.globalIndex}" data-amt="${item.amount}" data-desc="${item.desc}" data-date="${item.date}" title="Editar" style="padding: 2px 6px; margin-right: 5px;">✏️</button>
+                        <button class="btn danger btn-sm d-card-btn" data-type="global" data-idx="${item.globalIndex}" title="Eliminar" style="padding: 2px 6px;">🗑️</button>
                     </div>`;
                 } else if(item.memberIndex !== undefined) {
                     actions = `
                     <div style="float: right;">
-                        <button class="btn info btn-sm e-card-btn" data-type="member" data-mid="${item.memberId}" data-idx="${item.memberIndex}" data-amt="${item.amount}" data-desc="${item.desc}" data-date="${item.date}" title="Editar" style="padding: 2px 6px; margin-right: 5px;"></button>
-                        <button class="btn danger btn-sm d-card-btn" data-type="member" data-mid="${item.memberId}" data-idx="${item.memberIndex}" title="Eliminar" style="padding: 2px 6px;"></button>
+                        <button class="btn info btn-sm e-card-btn" data-type="member" data-mid="${item.memberId}" data-idx="${item.memberIndex}" data-amt="${item.amount}" data-desc="${item.desc}" data-date="${item.date}" title="Editar" style="padding: 2px 6px; margin-right: 5px;">✏️</button>
+                        <button class="btn danger btn-sm d-card-btn" data-type="member" data-mid="${item.memberId}" data-idx="${item.memberIndex}" title="Eliminar" style="padding: 2px 6px;">🗑️</button>
                     </div>`;
                 }
             }
