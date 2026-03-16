@@ -338,3 +338,74 @@ select[multiple] { height: auto; min-height: 100px; }
     font-size: 1.05rem;
     color: var(--text);
 }
+
+/* ====== RESPONSIVE DESIGN ====== */
+@media (max-width: 768px) {
+    /* Header */
+    .header-container {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    /* Stats */
+    .stats-grid, .admin-actions {
+        grid-template-columns: 1fr;
+    }
+    
+    .stat-box {
+        padding: 1.5rem;
+    }
+    
+    .stat-box .counter {
+        font-size: 2rem;
+    }
+
+    /* Tabla Admin */
+    .table-header {
+        flex-direction: column;
+        gap: 1rem;
+        align-items: stretch;
+        text-align: center;
+    }
+    
+    .table-input-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .table-input-group input {
+        width: 100%;
+        margin-bottom: 0px;
+    }
+    
+    /* Personal Box */
+    .personal-box {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .personal-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .badge-number {
+        margin: 0 auto;
+    }
+
+    /* Utilitarios */
+    .action-card {
+        padding: 1.5rem;
+    }
+    
+    /* Historial */
+    .history-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    /* Checklist */
+    .checklist-container {
+        grid-template-columns: 1fr;
+    }
+}
