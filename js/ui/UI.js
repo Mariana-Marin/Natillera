@@ -81,7 +81,29 @@ export class UI {
         this.addMemberBtn = document.getElementById("addMemberBtn");
     }
 
-    bindEvents() {
+        bindEvents() {
+        // Pin Pad Events
+        if (this.pinBtns && this.pinBtns.length > 0) {
+            this.pinBtns.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    if (this.currentPinInput.length < 4) {
+                        this.currentPinInput += e.target.dataset.val;
+                        this.updatePinDisplay();
+                    }
+                });
+            });
+            
+            this.pinClear.addEventListener('click', () => {
+                this.currentPinInput = "";
+                this.updatePinDisplay();
+            });
+            
+            this.pinDelete.addEventListener('click', () => {
+                this.currentPinInput = this.currentPinInput.slice(0, -1);
+                this.updatePinDisplay();
+            });
+        }
+
         // Modal Detalle Stats
         this.detailModalCloseBtn.addEventListener("click", () => this.detailModal.classList.add("hidden"));
 
@@ -617,6 +639,7 @@ export class UI {
         return new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(amount);
     }
 }
+
 
 
 
