@@ -1,0 +1,231 @@
+﻿<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Natillera Familiar Pro</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+    <!-- Firebase SDKs -->
+    <script type="module" src="js/main.js" defer></script>
+</head>
+<body>
+    <header class="glass-header">
+        <div class="header-container">
+            <h1 class="animate__animated animate__pulse"> Natillera Familiar</h1>
+            <div class="header-actions">
+                <button id="adminPanelBtn" class="btn warning hidden animate__animated animate__fadeIn">Control Admin</button>
+                <button id="backHomeBtn" class="btn secondary hidden animate__animated animate__fadeIn"> Inicio</button>
+                <button id="adminLoginBtn" class="btn warning"> Acceso Admin</button>
+                <button id="adminLogoutBtn" class="btn danger hidden">Salir Admin</button>
+            </div>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Dashboard Público -->
+        <section id="publicDashboard" class="card shadow-lg animate__animated animate__zoomIn">
+            <h2 class="section-title">Resumen Financiero Total</h2>
+            <div class="stats-grid">
+                <div class="stat-box primary-grad clickable" id="boxTotalSavings" title="Ver detalle de todos los integrantes">
+                    <h3>🏦 Fondo de Ahorro</h3>
+                    <p id="totalSavings" class="counter">$0</p>
+                </div>
+                <div class="stat-box success-grad clickable" id="boxTotalEarnings" title="Ver desglose de ganancias">
+                    <h3>📈 Ganancias Comunes</h3>
+                    <p id="totalEarnings" class="counter">$0</p>
+                </div>
+                <div class="stat-box info-grad clickable" id="boxEarningsPerMember" title="¿Cómo se calcula?">
+                    <h3> Correspondiente c/u</h3>
+                    <p id="earningsPerMember" class="counter">$0</p>
+                </div>
+            </div>
+            
+            <hr class="divider">
+            <h3 class="section-title"> Consulta tu Estado Personal e Historial</h3>
+            <div class="search-member">
+                <select id="memberSelect" class="input-control modern-select">
+                    <option value=""> Selecciona tu nombre...</option>
+                </select>
+                <div id="personalSummary" class="hidden personal-box bounce-in">
+                    <div class="personal-header">
+                        <div class="badge-number">#<span id="pNumber"></span></div>
+                        <div class="personal-stats">
+                            <div class="stat"><span>Ahorro:</span> <strong id="pSavings"></strong></div>
+                            <div class="stat highlight"><span>Total (Ahorro + Ganancia):</span> <strong id="pTotal"></strong></div>
+                        </div>
+                    </div>
+                    <div class="personal-history-section mt-2">
+                        <h4> Tu Historial Personal</h4>
+                        <ul id="personalHistoryList" class="personal-history-list"></ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Historial Global (Calendario) -->
+            <hr class="divider">
+            <h3 class="section-title"> Historial Global de Movimientos</h3>
+            <div class="calendar-container shadow-sm">
+                <p>Todos los movimientos recientes (actividades, aportes, polla):</p>
+                <div id="historyList" class="history-grid">
+                    <!-- Se llena en JS -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Panel de Administración -->
+        <section id="adminDashboard" class="hidden card admin-card animate__animated animate__fadeInUp">
+            <h2 class="admin-title">Panel de Control </h2>
+            
+            <div class="admin-actions">
+                <!-- Gestión de Actividades -->
+                <div class="action-card float-hover">
+                    <h3> Actividad Mensual</h3>
+                    <form id="globalEarningsForm">
+                        <label>Nombre de la Actividad:</label>
+                        <input type="text" id="activityName" class="input-control" placeholder="Ej: Venta de Empanadas" required>
+                        <label>Fecha:</label>
+                        <input type="date" id="activityDate" class="input-control" required>
+                        <label>Integrantes Participantes:</label>
+                        <div id="activityMembersContainer" class="checklist-container">
+                            <!-- Llenado en JS con checkboxes -->
+                        </div>
+                        <label class="mt-2">Ganancia Neta ($):</label>
+                        <input type="number" id="activityIncome" class="input-control" placeholder="Ej: 200000" min="0" required>
+                        <button type="submit" class="btn success w-100 mt-2">Registrar Actividad</button>
+                    </form>
+                </div>
+
+                <!-- La Polla -->
+                <div class="action-card float-hover">
+                    <h3> La Polla Mensual</h3>
+                    <form id="pollaForm">
+                        <label>Fecha del Sorteo:</label>
+                        <input type="date" id="pollaDate" class="input-control" required>
+                        <label>¿Hubo ganador?</label>
+                        <select id="pollaWinnerType" class="input-control">
+                            <option value="yes">Sí, 50% Premio / 50% Fondo ($90k al fondo)</option>
+                            <option value="no">No, 100% al Fondo ($180k al fondo)</option>
+                        </select>
+                        <div id="pollaWinnerNumberContainer">
+                            <label>Número Ganador:</label>
+                            <input type="number" id="pollaWinnerNumber" class="input-control" placeholder="Ej: 15" min="0" max="99">
+                        </div>
+                        <button type="submit" class="btn danger w-100 mt-2">Registrar Polla</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Sección Exclusiva de Préstamos -->
+            <hr class="divider">
+            <h2 class="admin-title" style="font-size:1.5rem; text-align:left;"> Centro de Gestión de Préstamos</h2>
+            <div class="admin-actions">
+                <div class="action-card float-hover">
+                    <h3>Otorgar Nuevo Préstamo</h3>
+                    <form id="loanForm">
+                        <label>Integrante que recibe:</label>
+                        <select id="loanMember" class="input-control" required></select>
+                        <label>Fecha:</label>
+                        <input type="date" id="loanDate" class="input-control" required>
+                        <label>Monto Prestado ($):</label>
+                        <input type="number" id="loanAmount" class="input-control" placeholder="Ej: 500000" min="1" required>
+                        <button type="submit" class="btn warning w-100 mt-2">Registrar Préstamo</button>
+                    </form>
+                </div>
+                <div class="action-card float-hover">
+                    <h3>Abonar a Préstamos/Intereses</h3>
+                    <form id="loanPaymentForm">
+                        <label>Integrante:</label>
+                        <select id="paymentMember" class="input-control" required></select>
+                        <label>Fecha del Pago:</label>
+                        <input type="date" id="paymentDate" class="input-control" required>
+                        <label>Abono al Capital (Deuda) ($):</label>
+                        <input type="number" id="paymentCapital" class="input-control" placeholder="0" min="0">
+                        <label>Pago de Intereses (Al fondo) ($):</label>
+                        <input type="number" id="paymentInterest" class="input-control" placeholder="0" min="0">
+                        <button type="submit" class="btn primary w-100 mt-2">Registrar Pagos</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tabla principal de ahorros -->
+            <hr class="divider">
+            <div class="table-container shadow-sm mt-3">
+                <div class="table-header">
+                    <h3> Gestión de Integrantes (Ahorros y Estado)</h3>
+                    <div>
+                        <button id="addMemberBtn" class="btn info btn-sm"> Nuevo Integrante</button>
+                    </div>
+                </div>
+                <table id="membersTable" class="modern-table">
+
+                    <thead>
+                        <tr>
+                            <th>Nº</th>
+                            <th>Nombre</th>
+                            <th>Ahorro Acumulado</th>
+                            <th>Deuda Actual / Intereses Pagados</th>
+                            <th>Abonar Ahorro</th>
+                        </tr>
+                    </thead>
+                    <tbody id="membersTableBody">
+                        <!-- Llenado dinámicamente -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+
+    <!-- Modal Admin -->
+    <div id="adminModal" class="modal hidden">
+        <div class="modal-content admin-login-card animate__animated animate__bounceIn">
+            <h3> Acceso Autenticado</h3>
+            <p>Ingresa la contraseña maestra para continuar.</p>
+            <input type="password" id="adminPassword" class="input-control" placeholder="Contraseña">
+            <div class="modal-actions mt-2">
+                <button id="loginConfirmBtn" class="btn success flex-1">Verificar</button>
+                <button id="loginCancelBtn" class="btn flex-1">Cancelar</button>
+            </div>
+        </div>
+    </div>
+    <!-- Modal Detalles (Desglose) -->
+    <div id="detailModal" class="modal hidden">
+        <div class="modal-content animate__animated animate__zoomIn" style="max-width: 450px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 0.5rem;">
+                <h3 id="detailModalTitle" style="color:var(--secondary);">Detalle</h3>
+            </div>
+            <div id="detailModalBody" style="text-align: left; max-height: 50vh; overflow-y: auto; padding-right: 10px;">
+                <!-- Contenido dinámico -->
+            </div>
+            <div class="mt-3">
+                <button id="detailModalCloseBtn" class="btn secondary w-100">Cerrar</button>
+            </div>
+        </div>
+    </div>    <!-- Modal Gestión Avanzada de Integrante (Editar/Eliminar) -->
+    <div id="memberManageModal" class="modal hidden">
+        <div class="modal-content animate__animated animate__fadeInUp" style="max-width: 600px; text-align:left;">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-bottom: 1rem;">
+                <h3 style="color:var(--secondary);"> Gestionar Integrante: <span id="manageMemberName"></span></h3>
+                <button id="closeManageModalBtn" class="btn danger btn-sm" style="padding:0.2rem 0.5rem;">Cerrar</button>
+            </div>
+            
+            <div style="max-height: 50vh; overflow-y: auto; padding-right: 10px;">
+                <h4 style="margin-bottom:0.5rem; color:var(--text); border-bottom: 2px solid var(--primary); display:inline-block;">Historial & Transacciones</h4>
+                <p style="font-size:0.85rem; color:#666; margin-bottom:1rem;">Puedes deshacer transacciones individuales de este integrante. El dinero será deducido automáticamente.</p>
+                <ul id="manageHistoryList" class="detail-list" style="margin-bottom: 2rem;">
+                    <!-- Llenado dinámicamente -->
+                </ul>
+
+                <h4 style="margin-bottom:0.5rem; color:#e74c3c; border-bottom: 2px solid #e74c3c; display:inline-block;"> Zona de Peligro</h4>
+                <div style="background:#fef2f2; padding:1rem; border-radius:6px; border:1px solid #fbd5d5; margin-top:1rem;">
+                    <p style="font-size:0.9rem; color:#e74c3c; margin-bottom:0.5rem;"><strong>Eliminar Integrante:</strong> Esta acción borrará al integrante y descontará TODO su ahorro del fondo total. Las ganancias comunes no se ven afectadas.</p>
+                    <button id="deleteMemberActionBtn" class="btn danger w-100">Eliminar Integrante Completamente</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</body>
+</html>
+
+
